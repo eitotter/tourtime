@@ -1,4 +1,4 @@
-const CACHE = 'tourtime-v5';
+const CACHE = 'tourtime-v6';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

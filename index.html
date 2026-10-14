@@ -484,7 +484,12 @@ function cityOptions(country, sel) {
 // ================= 差旅：列表 ／ 詳情 ／ 編輯 =================
 function listHtml() {
   const sorted = trips.slice().sort((a, b) => b.updatedAt - a.updatedAt);
-  return `<div class="trip-head"><h2 class="sec">📚 我的行程</h2><button class="primary" data-act="new">＋ 新增行程</button></div>
+  return `<div class="trip-head"><h2 class="sec">📚 我的行程</h2>
+      <div class="actions">
+        <button data-act="importPaste">📥 匯入</button>
+        <button class="primary" data-act="new">＋ 新增行程</button>
+      </div>
+    </div>
     ${sorted.length
       ? sorted.map(t => `<div class="tripcard" data-act="open" data-id="${t.id}">
           <div class="name">${esc(t.name)}</div>
@@ -667,7 +672,7 @@ async function shareTrip(t) {
   // 目前頁面的正式網址（去掉 # 與 ?）
   const pageUrl = location.href.split('#')[0].split('?')[0];
   if (!/^https?:\/\//.test(pageUrl)) {
-    alert('目前是預覽環境，無法產生可分享的連結。\n\n請先把 TourTime 上傳到 Netlify 或 GitHub Pages（https 網址）後，從該網址開啟再分享。');
+    alert('目前是預覽環境，無法產生可分享的連結。\n\n請先把 TourTime 上傳到 GitHub Pages 或 Netlify（https 網址）後，從該網址開啟再分享。');
     return;
   }
   const payload = { v: 1, n: t.name, s: t.stops.map(s => [s.cityId, s.arrive, s.depart]) };
@@ -679,6 +684,30 @@ async function shareTrip(t) {
   } else {
     toast('複製失敗，請長按下方視窗的連結');
     prompt('請長按複製以下內容：', text);
+  }
+}
+
+// 解析分享內容：可接受完整連結、含連結的文字，或純代碼
+function parseShareText(text) {
+  const m = text.match(/#trip=([A-Za-z0-9\-_]+)/);
+  const code = m ? m[1] : text.trim();
+  const p = JSON.parse(b64dec(code));
+  if (!p || !Array.isArray(p.s)) throw new Error('格式不符');
+  const stops = p.s
+    .map(([cityId, arrive, depart]) => ({ id: uid(), cityId, arrive, depart }))
+    .filter(s => byId(s.cityId));
+  if (!stops.length) throw new Error('沒有有效的城市站點');
+  return { id: uid(), name: p.n || '分享的行程', stops };
+}
+
+// 手動貼上匯入：開啟預覽畫面
+function openPasteImport() {
+  const text = prompt('請貼上對方分享的連結或文字：');
+  if (!text) return;
+  try {
+    view = { mode: 'detail', id: null, temp: parseShareText(text) };
+  } catch (e) {
+    alert('無法解析此內容：' + e.message);
   }
 }
 
@@ -710,6 +739,7 @@ $('#tripView').addEventListener('click', e => {
   const act = el.dataset.act, i = +el.dataset.idx;
   const d = view.draft;
   switch (act) {
+    case 'importPaste': openPasteImport(); break;
     case 'new': startEdit(null); break;
     case 'open': view = { mode:'detail', id: el.dataset.id }; break;
     case 'back': view = { mode:'list' }; break;
