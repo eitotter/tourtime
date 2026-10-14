@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TourTime">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>TourTime</title>
+<style>
+  :root{--bg:#0f172a;--panel:#1e293b;--border:#334155;--text:#f1f5f9;--muted:#94a3b8;--accent:#6366f1}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif}
+  body{padding:calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 14px) calc(env(safe-area-inset-bottom) + 24px) calc(env(safe-area-inset-left) + 14px)}
+  .wrap{max-width:960px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  h1{font-size:20px;margin:0}
+  h2.sec{font-size:16px;margin:0}
+  .pill{font-size:12px;padding:4px 10px;border-radius:999px;background:#14532d;color:#bbf7d0;white-space:nowrap}
+  .pill.off{background:#7c2d12;color:#fed7aa}
+  .tabs{display:flex;gap:8px;margin-bottom:14px}
+  .tab{flex:1;background:var(--panel);color:var(--muted)}
+  .tab.on{background:var(--accent);color:#fff}
+  .hidden{display:none!important}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:14px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .full{grid-column:1/-1}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  select,input{width:100%;font-size:16px;padding:10px;border-radius:10px;border:1px solid #475569;background:var(--bg);color:var(--text);min-height:44px;font-family:inherit}
+  input{-webkit-appearance:none;appearance:none}
+  .row{display:flex;gap:8px;margin-top:10px}
+  .row>*{flex:1}
+  button{font-size:15px;border:0;border-radius:10px;padding:10px 12px;background:#334155;color:#fff;min-height:44px;font-family:inherit}
+  button:active{opacity:.6}
+  button.primary{background:var(--accent)}
+  button.danger{background:#7f1d1d}
+  button:disabled{opacity:.4}
+  .cards{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:700px){.cards{grid-template-columns:1fr 1fr}}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px}
+  .card.base{background:#312e81;border-color:#818cf8}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px}
+  .name{font-size:18px;font-weight:700}
+  .country{font-size:13px;color:var(--muted);font-weight:400;margin-left:4px}
+  .tag{font-size:11px;background:var(--accent);padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:middle}
+  .sub{font-size:12px;color:var(--muted);margin-top:3px}
+  .actions{display:flex;gap:6px}
+  .actions button{font-size:12px;min-height:32px;padding:6px 10px}
+  .time{display:flex;align-items:baseline;gap:8px}
+  .period{font-size:14px;color:#cbd5e1}
+  .clock{font-size:40px;font-weight:700;font-family:ui-monospace,Menlo,monospace;letter-spacing:1px}
+  .date{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px;color:#cbd5e1;margin:4px 0 12px}
+  .badge{font-size:11px;padding:2px 8px;border-radius:999px;color:#fff;white-space:nowrap}
+  .b0{background:#475569}.bm{background:#2563eb}.bp{background:#ea580c}
+  .diff{font-size:12px;color:var(--muted)}
+  .wx{border-top:1px solid var(--border);padding-top:10px;min-height:56px}
+  .wxrow{display:flex;align-items:center;gap:12px}
+  .wxicon{font-size:34px}
+  .temp{font-size:22px;font-weight:600}
+  .wxtext{font-size:13px;color:#cbd5e1}
+  .wxdetail{margin-left:auto;font-size:12px;color:var(--muted);line-height:1.6;text-align:right}
+  .wxmeta{font-size:11px;color:#64748b;margin-top:6px}
+  .note{font-size:13px;color:var(--muted)}
+  .warn{color:#fbbf24}.err{color:#f87171}
+  .stop{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px}
+  .stophead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .wxboxes{display:flex;gap:8px;margin-top:10px}
+  .wxbox{flex:1;background:var(--bg);border-radius:10px;padding:10px;font-size:13px;min-width:0}
+  .wxtag{font-size:11px;color:var(--muted);margin-bottom:4px}
+  .wxrow2{display:flex;align-items:center;gap:8px}
+  .wxicon2{font-size:26px}
+  .trip-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+  .tripcard{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+  .tripcard:active{opacity:.6}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .btnrow>*{flex:1}
+  footer{font-size:11px;color:#64748b;margin-top:18px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🦦 TourTime</h1>
+    <span id="status" class="pill">● 線上</span>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab on" data-tab="cities">🌍 城市</button>
+    <button class="tab" data-tab="trip">🧳 差旅</button>
+  </nav>
+
+  <!-- 城市分頁 -->
+  <div id="tab-cities">
+    <section class="panel">
+      <div class="grid">
+        <div class="full">
+          <label>基準城市</label>
+          <select id="baseSel"></select>
+        </div>
+        <div>
+          <label id="dateLbl">日期</label>
+          <input type="date" id="date">
+        </div>
+        <div>
+          <label id="timeLbl">時間</label>
+          <input type="time" id="time">
+        </div>
+      </div>
+      <div class="row">
+        <button id="minus">−1h</button>
+        <button id="plus">+1h</button>
+        <button id="now">🕐 現在</button>
+        <button id="refresh">↻ 天氣</button>
+      </div>
+      <div class="row">
+        <select id="addSel" style="flex:3"></select>
+        <button id="addBtn" class="primary" disabled>＋ 加入</button>
+      </div>
+    </section>
+    <main id="cards" class="cards"></main>
+  </div>
+
+  <!-- 差旅分頁（列表／詳情／編輯 由程式動態產生） -->
+  <div id="tab-trip" class="hidden">
+    <div id="tripView"></div>
+  </div>
+
+  <footer>
+    天氣資料：Open-Meteo（每小時預報，約 16 天內）。離線時顯示上次儲存的預報。<br>
+    差旅每日天氣依各城市當地日期統計（最低／最高溫、最大降雨機率）。<br>
+    時區與夏令時間由裝置內建時區資料計算，離線也能使用。
+  </footer>
+</div>
+
+<script>
+// [id, 名稱, 國家, 地區, 時區, 緯度, 經度]
+const RAW = [
+  ['taipei','台北','台灣','亞洲','Asia/Taipei',25.033,121.565],
+  ['taoyuan','桃園','台灣','亞洲','Asia/Taipei',24.993,121.300],
+  ['hsinchu','新竹','台灣','亞洲','Asia/Taipei',24.804,120.972],
+  ['taichung','台中','台灣','亞洲','Asia/Taipei',24.148,120.674],
+  ['chiayi','嘉義','台灣','亞洲','Asia/Taipei',23.480,120.449],
+  ['tainan','台南','台灣','亞洲','Asia/Taipei',22.999,120.227],
+  ['kaohsiung','高雄','台灣','亞洲','Asia/Taipei',22.627,120.301],
+  ['pingtung','屏東','台灣','亞洲','Asia/Taipei',22.668,120.486],
+  ['yilan','宜蘭','台灣','亞洲','Asia/Taipei',24.757,121.753],
+  ['hualien','花蓮','台灣','亞洲','Asia/Taipei',23.992,121.601],
+  ['tokyo','東京','日本','亞洲','Asia/Tokyo',35.676,139.650],
+  ['osaka','大阪','日本','亞洲','Asia/Tokyo',34.694,135.502],
+  ['nagoya','名古屋','日本','亞洲','Asia/Tokyo',35.182,136.907],
+  ['fukuoka','福岡','日本','亞洲','Asia/Tokyo',33.590,130.402],
+  ['sapporo','札幌','日本','亞洲','Asia/Tokyo',43.062,141.354],
+  ['okinawa','那霸','日本','亞洲','Asia/Tokyo',26.212,127.681],
+  ['seoul','首爾','韓國','亞洲','Asia/Seoul',37.566,126.978],
+  ['busan','釜山','韓國','亞洲','Asia/Seoul',35.180,129.075],
+  ['hongkong','香港','香港','亞洲','Asia/Hong_Kong',22.319,114.169],
+  ['macau','澳門','澳門','亞洲','Asia/Macau',22.199,113.544],
+  ['shanghai','上海','中國','亞洲','Asia/Shanghai',31.230,121.474],
+  ['nanjing','南京','中國','亞洲','Asia/Shanghai',32.060,118.797],
+  ['hangzhou','杭州','中國','亞洲','Asia/Shanghai',30.274,120.155],
+  ['suzhou','蘇州','中國','亞洲','Asia/Shanghai',31.299,120.585],
+  ['guangzhou','廣州','中國','亞洲','Asia/Shanghai',23.129,113.264],
+  ['shenzhen','深圳','中國','亞洲','Asia/Shanghai',22.543,114.058],
+  ['xiamen','廈門','中國','亞洲','Asia/Shanghai',24.480,118.089],
+  ['wuhan','武漢','中國','亞洲','Asia/Shanghai',30.593,114.305],
+  ['chengdu','成都','中國','亞洲','Asia/Shanghai',30.573,104.066],
+  ['chongqing','重慶','中國','亞洲','Asia/Shanghai',29.563,106.552],
+  ['xian','西安','中國','亞洲','Asia/Shanghai',34.341,108.940],
+  ['beijing','北京','中國','亞洲','Asia/Shanghai',39.904,116.407],
+  ['singapore','新加坡','新加坡','亞洲','Asia/Singapore',1.352,103.820],
+  ['kualalumpur','吉隆坡','馬來西亞','亞洲','Asia/Kuala_Lumpur',3.139,101.687],
+  ['bangkok','曼谷','泰國','亞洲','Asia/Bangkok',13.756,100.502],
+  ['manila','馬尼拉','菲律賓','亞洲','Asia/Manila',14.600,120.984],
+  ['hanoi','河內','越南','亞洲','Asia/Ho_Chi_Minh',21.028,105.834],
+  ['hochiminh','胡志明市','越南','亞洲','Asia/Ho_Chi_Minh',10.823,106.630],
+  ['jakarta','雅加達','印尼','亞洲','Asia/Jakarta',-6.208,106.846],
+  ['mumbai','孟買','印度','亞洲','Asia/Kolkata',19.076,72.878],
+  ['dubai','杜拜','阿聯酋','中東','Asia/Dubai',25.205,55.271],
+  ['sydney','雪梨','澳洲','大洋洲','Australia/Sydney',-33.869,151.209],
+  ['melbourne','墨爾本','澳洲','大洋洲','Australia/Melbourne',-37.814,144.963],
+  ['auckland','奧克蘭','紐西蘭','大洋洲','Pacific/Auckland',-36.849,174.763],
+  ['london','倫敦','英國','歐洲','Europe/London',51.507,-0.128],
+  ['paris','巴黎','法國','歐洲','Europe/Paris',48.857,2.352],
+  ['berlin','柏林','德國','歐洲','Europe/Berlin',52.520,13.405],
+  ['amsterdam','阿姆斯特丹','荷蘭','歐洲','Europe/Amsterdam',52.368,4.904],
+  ['madrid','馬德里','西班牙','歐洲','Europe/Madrid',40.417,-3.704],
+  ['rome','羅馬','義大利','歐洲','Europe/Rome',41.903,12.496],
+  ['newyork','紐約','美國','美洲','America/New_York',40.713,-74.006],
+  ['boston','波士頓','美國','美洲','America/New_York',42.360,-71.058],
+  ['washington','華盛頓特區','美國','美洲','America/New_York',38.907,-77.037],
+  ['miami','邁阿密','美國','美洲','America/New_York',25.762,-80.192],
+  ['orlando','奧蘭多','美國','美洲','America/New_York',28.538,-81.379],
+  ['chicago','芝加哥','美國','美洲','America/Chicago',41.878,-87.630],
+  ['houston','休士頓','美國','美洲','America/Chicago',29.760,-95.370],
+  ['dallas','達拉斯','美國','美洲','America/Chicago',32.777,-96.797],
+  ['denver','丹佛','美國','美洲','America/Denver',39.739,-104.990],
+  ['losangeles','洛杉磯','美國','美洲','America/Los_Angeles',34.052,-118.244],
+  ['sanfrancisco','舊金山','美國','美洲','America/Los_Angeles',37.775,-122.419],
+  ['seattle','西雅圖','美國','美洲','America/Los_Angeles',47.606,-122.332],
+  ['sandiego','聖地牙哥','美國','美洲','America/Los_Angeles',32.716,-117.161],
+  ['lasvegas','拉斯維加斯','美國','美洲','America/Los_Angeles',36.170,-115.140],
+  ['honolulu','檀香山','美國','美洲','Pacific/Honolulu',21.307,-157.858],
+  ['toronto','多倫多','加拿大','美洲','America/Toronto',43.653,-79.383],
+  ['montreal','蒙特婁','加拿大','美洲','America/Toronto',45.501,-73.567],
+  ['vancouver','溫哥華','加拿大','美洲','America/Vancouver',49.283,-123.121],
+  ['calgary','卡加利','加拿大','美洲','America/Edmonton',51.045,-114.057],
+  ['mexicocity','墨西哥城','墨西哥','美洲','America/Mexico_City',19.433,-99.133],
+  ['saopaulo','聖保羅','巴西','美洲','America/Sao_Paulo',-23.551,-46.633],
+];
+const CITIES = RAW.map(r => ({ id:r[0], name:r[1], country:r[2], region:r[3], tz:r[4], lat:r[5], lon:r[6] }));
+const REGIONS = ['亞洲','中東','大洋洲','歐洲','美洲'];
+const COUNTRIES = [];
+CITIES.forEach(c => { if (!COUNTRIES.find(x => x.name === c.country)) COUNTRIES.push({ name:c.country, region:c.region }); });
+
+const $ = (s) => document.querySelector(s);
+const byId = (id) => CITIES.find(c => c.id === id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+// ---------- 本機儲存 ----------
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+let state = LS.get('wt_state', null) || { baseId:'taipei', selected:['losangeles','tokyo','london','newyork'] };
+if (!byId(state.baseId)) state.baseId = 'taipei';
+state.selected = state.selected.filter(id => byId(id) && id !== state.baseId);
+const saveState = () => LS.set('wt_state', state);
+const base = () => byId(state.baseId);
+
+// 已儲存的行程
+let trips = LS.get('wt_trips', []).map(t => ({ ...t, saved: true, updatedAt: t.updatedAt || Date.now() }));
+const saveTrips = () => LS.set('wt_trips', trips);
+// 差旅頁狀態：list ／ detail（已儲存或預覽）／ edit（新增或編輯草稿）
+let view = { mode:'list' };
+const curTrip = () => view.mode === 'detail' ? (view.temp || trips.find(t => t.id === view.id) || null) : null;
+
+let weather = LS.get('wt_weather', {});
+Object.keys(weather).forEach(k => { if (!weather[k] || Date.now() - weather[k].fetchedAt > 17 * 86400000) delete weather[k]; });
+const saveWeather = () => LS.set('wt_weather', weather);
+const loading = {}, errors = {};
+
+// ---------- 時區工具 ----------
+function getOffsetMs(tz, date) {
+  const dtf = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle:'h23', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const p = {};
+  dtf.formatToParts(date).forEach(x => { p[x.type] = x.value; });
+  const asUtc = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
+  return asUtc - (date.getTime() - date.getMilliseconds());
+}
+function zonedToUtc(dateStr, timeStr, tz) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const [h, mi] = timeStr.split(':').map(Number);
+  const guess = Date.UTC(y, m - 1, d, h, mi);
+  const off1 = getOffsetMs(tz, new Date(guess));
+  let utc = guess - off1;
+  const off2 = getOffsetMs(tz, new Date(utc));
+  if (off2 !== off1) utc = guess - off2;
+  return new Date(utc);
+}
+const dateKey = (tz, d) => new Intl.DateTimeFormat('en-CA', { timeZone:tz, year:'numeric', month:'2-digit', day:'2-digit' }).format(d);
+const timeStrIn = (tz, d) => new Intl.DateTimeFormat('en-GB', { timeZone:tz, hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).format(d).replace(/^24/, '00');
+const dateLabel = (tz, d) => new Intl.DateTimeFormat('zh-TW', { timeZone:tz, year:'numeric', month:'long', day:'numeric', weekday:'short' }).format(d);
+function offsetLabel(ms) {
+  const mins = Math.round(ms / 60000), a = Math.abs(mins), h = Math.floor(a / 60), m = a % 60;
+  return `UTC${mins >= 0 ? '+' : '-'}${h}${m ? ':' + String(m).padStart(2, '0') : ''}`;
+}
+function isDST(tz, date) {
+  const y = date.getUTCFullYear();
+  const jan = getOffsetMs(tz, new Date(Date.UTC(y, 0, 1)));
+  const jul = getOffsetMs(tz, new Date(Date.UTC(y, 6, 1)));
+  if (jan === jul) return null;
+  return getOffsetMs(tz, date) === Math.max(jan, jul);
+}
+const periodLabel = (h) => h < 5 ? '凌晨' : h < 11 ? '早上' : h < 13 ? '中午' : h < 18 ? '下午' : '晚上';
+function weatherInfo(c) {
+  if (c === 0) return ['☀️','晴朗']; if (c === 1) return ['🌤️','大致晴']; if (c === 2) return ['⛅','多雲']; if (c === 3) return ['☁️','陰天'];
+  if (c === 45 || c === 48) return ['🌫️','霧']; if (c >= 51 && c <= 57) return ['🌦️','毛毛雨']; if (c >= 61 && c <= 67) return ['🌧️','下雨'];
+  if (c >= 71 && c <= 77) return ['❄️','下雪']; if (c >= 80 && c <= 82) return ['🌦️','陣雨']; if (c === 85 || c === 86) return ['🌨️','陣雪'];
+  if (c >= 95) return ['⛈️','雷雨']; return ['❔','未知'];
+}
+function fmtAgo(ts) {
+  const m = Math.round((Date.now() - ts) / 60000);
+  if (m < 1) return '剛剛'; if (m < 60) return `${m} 分鐘前`;
+  const h = Math.round(m / 60); if (h < 24) return `${h} 小時前`;
+  return `${Math.round(h / 24)} 天前`;
+}
+// 日期（YYYY-MM-DD）工具
+const ms = (ymd) => Date.parse(ymd + 'T00:00:00Z');
+const diffDays = (a, b) => Math.round((ms(b) - ms(a)) / 86400000);
+const addDays = (ymd, n) => new Date(ms(ymd) + n * 86400000).toISOString().slice(0, 10);
+const fmtDay = (ymd) => new Intl.DateTimeFormat('zh-TW', { timeZone:'UTC', year:'numeric', month:'numeric', day:'numeric', weekday:'short' }).format(new Date(ms(ymd)));
+const fmtShort = (ymd) => `${+ymd.slice(5, 7)}/${+ymd.slice(8, 10)}`;
+
+// UTF-8 安全的 Base64URL（用於分享連結）
+function b64enc(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function b64dec(str) {
+  let s = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  const bin = atob(s);
+  return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+}
+
+// ---------- 天氣（逐時資料，離線可用） ----------
+function cityIdsNeeded() {
+  const ids = new Set([state.baseId, ...state.selected]);
+  trips.forEach(t => t.stops.forEach(s => ids.add(s.cityId)));
+  if (view.mode === 'edit') view.draft.stops.forEach(s => ids.add(s.cityId));
+  if (view.temp) view.temp.stops.forEach(s => ids.add(s.cityId));
+  return [...ids].filter(Boolean);
+}
+async function fetchWeather(city, force) {
+  if (!city || !navigator.onLine || loading[city.id]) return;
+  const c = weather[city.id];
+  if (!force && c && Date.now() - c.fetchedAt < 3600000) return;
+  loading[city.id] = true; delete errors[city.id]; render(); renderResults();
+  const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), 10000);
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}` +
+      `&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,weather_code,wind_speed_10m&timezone=GMT&past_days=1&forecast_days=16`;
+    const r = await fetch(url, { signal: ctrl.signal, cache: 'no-store' });
+    if (!r.ok) throw new Error('bad');
+    const h = (await r.json()).hourly;
+    weather[city.id] = { fetchedAt: Date.now(), time: h.time, temp: h.temperature_2m, rh: h.relative_humidity_2m, pop: h.precipitation_probability, code: h.weather_code, wind: h.wind_speed_10m };
+    saveWeather();
+  } catch (e) { errors[city.id] = true; }
+  finally { clearTimeout(timer); loading[city.id] = false; render(); renderResults(); }
+}
+const fetchAll = (force) => cityIdsNeeded().forEach(id => fetchWeather(byId(id), force));
+
+function dayStats(city, ymd) {
+  const w = weather[city.id]; if (!w) return null;
+  let tmax = -Infinity, tmin = Infinity, pop = 0, code = null, n = 0;
+  w.time.forEach((t, i) => {
+    const local = new Date(Date.parse(t + ':00Z'));
+    if (dateKey(city.tz, local) !== ymd) return;
+    n++;
+    tmax = Math.max(tmax, w.temp[i]); tmin = Math.min(tmin, w.temp[i]);
+    if (w.pop && w.pop[i] != null) pop = Math.max(pop, w.pop[i]);
+    if (code === null || timeStrIn(city.tz, local) === '12:00') code = w.code[i];
+  });
+  return n ? { tmax, tmin, pop, code } : null;
+}
+function dayWxHtml(city, ymd) {
+  const w = weather[city.id];
+  if (!w) return loading[city.id] ? '<div class="note">載入中…</div>' : '<div class="note">尚無資料</div>';
+  const s = dayStats(city, ymd);
+  if (!s) return '<div class="note warn">超出預報範圍</div>';
+  const [icon, text] = weatherInfo(s.code);
+  return `<div class="wxrow2"><span class="wxicon2">${icon}</span><div>
+    <div><b>${Math.round(s.tmin)}–${Math.round(s.tmax)}°C</b></div>
+    <div class="wxtext">${text}・☂️ ${s.pop}%</div></div></div>`;
+}
+function renderWeather(city, utc) {
+  const w = weather[city.id];
+  const offline = !navigator.onLine;
+  if (!w) {
+    if (loading[city.id]) return '<div class="note">天氣載入中…</div>';
+    if (offline) return '<div class="note warn">離線中・尚無此城市的天氣資料</div>';
+    if (errors[city.id]) return '<div class="note err">天氣讀取失敗，請稍後按「↻ 天氣」</div>';
+    return '<div class="note">—</div>';
+  }
+  const meta = `<div class="wxmeta">${loading[city.id] ? '更新中…' : '更新於 ' + fmtAgo(w.fetchedAt)}${offline ? '（離線，顯示上次資料）' : ''}${errors[city.id] ? '（更新失敗）' : ''}</div>`;
+  const key = new Date(Math.round(utc.getTime() / 3600000) * 3600000).toISOString().slice(0, 13) + ':00';
+  const i = w.time.indexOf(key);
+  if (i < 0) return '<div class="note warn">超出預報範圍（約 16 天內）</div>' + meta;
+  const [icon, text] = weatherInfo(w.code[i]);
+  const pop = w.pop && w.pop[i] != null ? w.pop[i] : '-';
+  return `<div class="wxrow"><div class="wxicon">${icon}</div>
+    <div><div class="temp">${Math.round(w.temp[i])}°C</div><div class="wxtext">${text}</div></div>
+    <div class="wxdetail">☂️ 降雨 ${pop}%<br>💧 濕度 ${w.rh[i]}%<br>💨 風速 ${Math.round(w.wind[i])} km/h</div></div>` + meta;
+}
+
+// ================= 城市分頁 =================
+let dateStr, timeStr;
+function setFromUtc(u) {
+  dateStr = dateKey(base().tz, u); timeStr = timeStrIn(base().tz, u);
+  $('#date').value = dateStr; $('#time').value = timeStr;
+}
+const currentUtc = () => (dateStr && timeStr) ? zonedToUtc(dateStr, timeStr, base().tz) : new Date();
+
+function optionsHtml(list, placeholder) {
+  let html = placeholder ? `<option value="">${placeholder}</option>` : '';
+  REGIONS.forEach(r => {
+    const items = list.filter(c => c.region === r);
+    if (items.length) html += `<optgroup label="${r}">` + items.map(c => `<option value="${c.id}">${esc(c.name)}（${esc(c.country)}）</option>`).join('') + '</optgroup>';
+  });
+  return html;
+}
+function renderSelects() {
+  $('#baseSel').innerHTML = optionsHtml(CITIES);
+  $('#baseSel').value = state.baseId;
+  $('#addSel').innerHTML = optionsHtml(CITIES.filter(c => c.id !== state.baseId && !state.selected.includes(c.id)), '＋ 選擇要加入的城市…');
+  $('#addBtn').disabled = true;
+  $('#dateLbl').textContent = `日期（${base().name}時間）`;
+  $('#timeLbl').textContent = `時間（${base().name}時間）`;
+}
+function card(id, isBase, utc, baseKey, baseOff) {
+  const c = byId(id), off = getOffsetMs(c.tz, utc), k = dateKey(c.tz, utc);
+  const dayDiff = diffDays(baseKey, k);
+  const hourDiff = (off - baseOff) / 3600000;
+  const t = timeStrIn(c.tz, utc), h = parseInt(t.slice(0, 2), 10), dst = isDST(c.tz, utc);
+  const badge = dayDiff === 0 ? ['同一天','b0'] : dayDiff < 0 ? [`前 ${-dayDiff} 天`,'bm'] : [`後 ${dayDiff} 天`,'bp'];
+  return `<div class="card ${isBase ? 'base' : ''}">
+    <div class="top">
+      <div>
+        <div class="name">📍 ${esc(c.name)}<span class="country">${esc(c.country)}</span>${isBase ? '<span class="tag">基準</span>' : ''}</div>
+        <div class="sub">${offsetLabel(off)}${dst === null ? '' : dst ? '　☀️ 夏令時間' : '　❄️ 冬令時間'}</div>
+      </div>
+      ${isBase ? '' : `<div class="actions"><button data-act="base" data-id="${id}">設為基準</button><button data-act="del" data-id="${id}">✕</button></div>`}
+    </div>
+    <div class="time"><span class="period">${periodLabel(h)}</span><span class="clock">${t}</span></div>
+    <div class="date">${dateLabel(c.tz, utc)}
+      ${isBase ? '' : `<span class="badge ${badge[1]}">${badge[0]}</span><span class="diff">${hourDiff === 0 ? '無時差' : `比${base().name}${hourDiff > 0 ? '快' : '慢'} ${Math.abs(hourDiff)} 小時`}</span>`}
+    </div>
+    <div class="wx">${renderWeather(c, utc)}</div>
+  </div>`;
+}
+function render() {
+  const utc = currentUtc(), b = base();
+  const baseKey = dateKey(b.tz, utc), baseOff = getOffsetMs(b.tz, utc);
+  $('#cards').innerHTML = card(state.baseId, true, utc, baseKey, baseOff) + state.selected.map(id => card(id, false, utc, baseKey, baseOff)).join('');
+  const on = navigator.onLine;
+  $('#status').textContent = on ? '● 線上' : '● 離線';
+  $('#status').className = 'pill' + (on ? '' : ' off');
+}
+function makeBase(id) {
+  const utc = currentUtc();
+  state.selected = [state.baseId, ...state.selected.filter(x => x !== id)];
+  state.baseId = id; saveState();
+  setFromUtc(utc); renderSelects(); render(); renderResults(); fetchAll(false);
+}
+
+$('#baseSel').addEventListener('change', e => makeBase(e.target.value));
+$('#date').addEventListener('change', e => { if (e.target.value) { dateStr = e.target.value; render(); } });
+$('#time').addEventListener('change', e => { if (e.target.value) { timeStr = e.target.value; render(); } });
+$('#minus').addEventListener('click', () => { setFromUtc(new Date(currentUtc().getTime() - 3600000)); render(); });
+$('#plus').addEventListener('click', () => { setFromUtc(new Date(currentUtc().getTime() + 3600000)); render(); });
+$('#now').addEventListener('click', () => { setFromUtc(new Date()); render(); });
+$('#refresh').addEventListener('click', () => {
+  if (!navigator.onLine) { alert('目前離線，無法更新天氣。時間換算仍可正常使用。'); return; }
+  fetchAll(true);
+});
+$('#addSel').addEventListener('change', e => { $('#addBtn').disabled = !e.target.value; });
+$('#addBtn').addEventListener('click', () => {
+  const id = $('#addSel').value;
+  if (id && !state.selected.includes(id) && id !== state.baseId) {
+    state.selected.push(id); saveState(); renderSelects(); render(); fetchWeather(byId(id), false);
+  }
+});
+$('#cards').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-act]'); if (!btn) return;
+  const id = btn.dataset.id;
+  if (btn.dataset.act === 'base') makeBase(id);
+  if (btn.dataset.act === 'del') { state.selected = state.selected.filter(x => x !== id); saveState(); renderSelects(); render(); }
+});
+
+// ================= 差旅：共用工具 =================
+function tripRange(t) {
+  if (!t.stops.length) return '尚無站點';
+  const a = t.stops.map(s => s.arrive).sort(), d = t.stops.map(s => s.depart).sort();
+  const nights = Math.max(0, diffDays(a[0], d[d.length - 1]));
+  return `${fmtDay(a[0])} → ${fmtDay(d[d.length - 1])}　・${t.stops.length} 站・共 ${nights} 晚`;
+}
+function countryOptions(sel) {
+  return REGIONS.map(r => {
+    const items = COUNTRIES.filter(c => c.region === r);
+    if (!items.length) return '';
+    return `<optgroup label="${r}">` + items.map(c => `<option value="${esc(c.name)}" ${c.name === sel ? 'selected' : ''}>${esc(c.name)}</option>`).join('') + '</optgroup>';
+  }).join('');
+}
+function cityOptions(country, sel) {
+  return CITIES.filter(c => c.country === country).map(c => `<option value="${c.id}" ${c.id === sel ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+}
+
+// ================= 差旅：列表 ／ 詳情 ／ 編輯 =================
+function listHtml() {
+  const sorted = trips.slice().sort((a, b) => b.updatedAt - a.updatedAt);
+  return `<div class="trip-head"><h2 class="sec">📚 我的行程</h2><button class="primary" data-act="new">＋ 新增行程</button></div>
+    ${sorted.length
+      ? sorted.map(t => `<div class="tripcard" data-act="open" data-id="${t.id}">
+          <div class="name">${esc(t.name)}</div>
+          <div class="sub" style="margin-top:4px">${tripRange(t)}</div>
+          <div class="sub">更新於 ${new Date(t.updatedAt).toLocaleDateString('zh-TW')}</div>
+        </div>`).join('')
+      : '<div class="panel note">還沒有儲存的行程，按「＋ 新增行程」開始規劃。</div>'}`;
+}
+function detailHtml() {
+  const t = curTrip();
+  if (!t) { view = { mode:'list' }; return listHtml(); }
+  const preview = !!view.temp;
+  return `<div class="trip-head"><button data-act="back">← 返回列表</button>${preview ? '<span class="badge bp">預覽（尚未儲存）</span>' : ''}</div>
+    <section class="panel">
+      <div class="name" style="font-size:20px">${esc(t.name)}</div>
+      <div class="sub" style="margin:4px 0 2px">${tripRange(t)}</div>
+      <div class="btnrow">${preview
+        ? '<button class="primary" data-act="importSave">💾 儲存到我的行程</button>'
+        : '<button class="primary" data-act="edit">✏️ 編輯</button><button data-act="share">📤 分享</button><button class="danger" data-act="delete">🗑 刪除</button>'}
+      </div>
+    </section>
+    <div id="results" class="cards">${resultsHtml(t)}</div>`;
+}
+function stopEditorHtml(s, i, n) {
+  const c = byId(s.cityId) || CITIES[0];
+  const bad = s.depart < s.arrive;
+  return `<div class="stop">
+    <div class="stophead"><b>第 ${i + 1} 站</b>
+      <div class="actions">
+        <button data-act="up" data-idx="${i}" ${i === 0 ? 'disabled' : ''}>↑</button>
+        <button data-act="down" data-idx="${i}" ${i === n - 1 ? 'disabled' : ''}>↓</button>
+        <button data-act="sdel" data-idx="${i}">刪除</button>
+      </div>
+    </div>
+    <div class="grid">
+      <div><label>國家／地區</label><select data-field="country" data-idx="${i}">${countryOptions(c.country)}</select></div>
+      <div><label>城市</label><select data-field="cityId" data-idx="${i}">${cityOptions(c.country, c.id)}</select></div>
+      <div><label>抵達日期</label><input type="date" data-field="arrive" data-idx="${i}" value="${s.arrive}"></div>
+      <div><label>離開日期</label><input type="date" data-field="depart" data-idx="${i}" value="${s.depart}"></div>
+    </div>
+    ${bad ? '<div class="note err" style="margin-top:6px">離開日期不能早於抵達日期</div>' : ''}
+  </div>`;
+}
+function editHtml() {
+  const d = view.draft;
+  return `<div class="trip-head">
+      <button data-act="cancel">取消</button>
+      <b>${view.isNew ? '新增行程' : '編輯行程'}</b>
+      <button class="primary" data-act="save">💾 儲存</button>
+    </div>
+    <section class="panel">
+      <label>行程名稱</label>
+      <input type="text" data-field="name" value="${esc(d.name)}" placeholder="例如：2027 北美巡迴">
+      <div class="sub" style="margin-top:8px">${tripRange(d)}</div>
+    </section>
+    ${d.stops.length
+      ? d.stops.map((s, i) => stopEditorHtml(s, i, d.stops.length)).join('')
+      : '<div class="panel note">還沒有站點，按下方「＋ 新增站點」開始規劃。</div>'}
+    <button data-act="addStop" class="primary" style="width:100%;margin-bottom:8px">＋ 新增站點</button>
+    <button class="primary" data-act="save" style="width:100%">💾 儲存行程</button>`;
+}
+function renderTrip() {
+  const box = $('#tripView');
+  if (view.mode === 'edit') box.innerHTML = editHtml();
+  else if (view.mode === 'detail') box.innerHTML = detailHtml();
+  else box.innerHTML = listHtml();
+  fetchAll(false);
+}
+
+// 每站的即時時間與天氣
+function resultCard(s, i, now, baseOff) {
+  const c = byId(s.cityId); if (!c) return '';
+  const b = base();
+  const off = getOffsetMs(c.tz, now);
+  const hourDiff = (off - baseOff) / 3600000;
+  const today = dateKey(c.tz, now);
+  const status = today < s.arrive ? ['尚未抵達','b0'] : today > s.depart ? ['已離開','b0'] : ['進行中','bp'];
+  const dst = isDST(c.tz, now);
+  const nights = Math.max(0, diffDays(s.arrive, s.depart));
+  const clock = timeStrIn(c.tz, now);
+  return `<div class="card ${status[0] === '進行中' ? 'base' : ''}">
+    <div class="top">
+      <div>
+        <div class="name">${i + 1}. 📍 ${esc(c.name)}<span class="country">${esc(c.country)}</span></div>
+        <div class="sub">${offsetLabel(off)}${dst === null ? '' : dst ? '　☀️ 夏令' : '　❄️ 冬令'}　${hourDiff === 0 ? '與基準同時區' : `比${b.name}${hourDiff > 0 ? '快' : '慢'} ${Math.abs(hourDiff)} 小時`}</div>
+      </div>
+      <span class="badge ${status[1]}">${status[0]}</span>
+    </div>
+    <div class="time"><span class="period">${periodLabel(parseInt(clock, 10))}</span><span class="clock">${clock}</span></div>
+    <div class="date">當地現在：${dateLabel(c.tz, now)}</div>
+    <div class="sub" style="margin-bottom:4px">${fmtDay(s.arrive)} → ${fmtDay(s.depart)}　共 ${nights} 晚</div>
+    <div class="wxboxes">
+      <div class="wxbox"><div class="wxtag">抵達日 ${fmtShort(s.arrive)}</div>${dayWxHtml(c, s.arrive)}</div>
+      <div class="wxbox"><div class="wxtag">離開日 ${fmtShort(s.depart)}</div>${dayWxHtml(c, s.depart)}</div>
+    </div>
+  </div>`;
+}
+function resultsHtml(t) {
+  if (!t.stops.length) return '<div class="note">這個行程還沒有站點。</div>';
+  const now = new Date();
+  const baseOff = getOffsetMs(base().tz, now);
+  return t.stops.map((s, i) => resultCard(s, i, now, baseOff)).join('');
+}
+function renderResults() {
+  const box = $('#results');
+  const t = curTrip();
+  if (box && t) box.innerHTML = resultsHtml(t);
+}
+
+// ---------- 差旅操作 ----------
+function startEdit(t) {
+  const draft = t ? JSON.parse(JSON.stringify(t)) : { id: uid(), name: '', stops: [] };
+  view = { mode:'edit', isNew: !t, id: draft.id, draft, orig: JSON.stringify(draft) };
+}
+function addStop() {
+  const d = view.draft;
+  const last = d.stops[d.stops.length - 1];
+  const arrive = last ? last.depart : dateKey(base().tz, new Date());
+  const cityId = last ? last.cityId : state.baseId;
+  d.stops.push({ id: uid(), cityId, arrive, depart: addDays(arrive, 1) });
+}
+function saveDraft() {
+  const d = view.draft;
+  if (!d.name.trim()) return alert('請輸入行程名稱');
+  if (!d.stops.length) return alert('請至少新增一個站點');
+  if (d.stops.some(s => s.depart < s.arrive)) return alert('有站點的離開日期早於抵達日期');
+  const t = { id: d.id, name: d.name.trim(), stops: d.stops, saved: true, updatedAt: Date.now() };
+  const i = trips.findIndex(x => x.id === t.id);
+  if (i >= 0) trips[i] = t; else trips.push(t);
+  saveTrips();
+  view = { mode:'detail', id: t.id };
+}
+function cancelEdit() {
+  if (JSON.stringify(view.draft) !== view.orig && !confirm('放棄未儲存的變更？')) return;
+  view = view.isNew ? { mode:'list' } : { mode:'detail', id: view.id };
+}
+function deleteTrip() {
+  const t = curTrip(); if (!t || !confirm(`刪除「${t.name}」？`)) return;
+  trips = trips.filter(x => x.id !== t.id); saveTrips();
+  view = { mode:'list' };
+}
+
+// ---------- 分享：複製可開啟的連結 ----------
+let toastTimer;
+function toast(msg) {
+  let el = document.getElementById('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    el.style.cssText = 'position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 30px);transform:translateX(-50%);background:#f1f5f9;color:#0f172a;padding:10px 16px;border-radius:999px;font-size:14px;z-index:99;box-shadow:0 4px 12px rgba(0,0,0,.4);transition:opacity .3s;opacity:0;pointer-events:none;max-width:90%;text-align:center';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.opacity = '0'; }, 2200);
+}
+// 傳統複製方式（備用）
+function legacyCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+  document.body.appendChild(ta);
+  ta.select();
+  ta.setSelectionRange(0, text.length);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+  return ok;
+}
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text).then(() => true, () => legacyCopy(text));
+  }
+  return Promise.resolve(legacyCopy(text));
+}
+async function shareTrip(t) {
+  if (!t) return;
+  // 目前頁面的正式網址（去掉 # 與 ?）
+  const pageUrl = location.href.split('#')[0].split('?')[0];
+  if (!/^https?:\/\//.test(pageUrl)) {
+    alert('目前是預覽環境，無法產生可分享的連結。\n\n請先把 TourTime 上傳到 Netlify 或 GitHub Pages（https 網址）後，從該網址開啟再分享。');
+    return;
+  }
+  const payload = { v: 1, n: t.name, s: t.stops.map(s => [s.cityId, s.arrive, s.depart]) };
+  const link = pageUrl + '#trip=' + b64enc(JSON.stringify(payload));
+  const text = `🧳 ${t.name}\n${link}`;
+  const ok = await copyText(text);
+  if (ok) {
+    toast('✅ 已複製行程連結');
+  } else {
+    toast('複製失敗，請長按下方視窗的連結');
+    prompt('請長按複製以下內容：', text);
+  }
+}
+
+// 接收分享：開啟連結時解析並以預覽顯示
+function importFromHash() {
+  const m = location.hash.match(/^#trip=(.+)$/); if (!m) return false;
+  try {
+    const p = JSON.parse(b64dec(m[1]));
+    const stops = p.s.map(([cityId, arrive, depart]) => ({ id: uid(), cityId, arrive, depart })).filter(s => byId(s.cityId));
+    history.replaceState(null, '', location.pathname + location.search);
+    view = { mode:'detail', id: null, temp: { id: uid(), name: p.n || '分享的行程', stops } };
+    return true;
+  } catch (e) {
+    alert('分享連結無法解析');
+    history.replaceState(null, '', location.pathname + location.search);
+    return false;
+  }
+}
+function importSave() {
+  const t = view.temp;
+  const nt = { id: uid(), name: t.name, stops: t.stops, saved: true, updatedAt: Date.now() };
+  trips.push(nt); saveTrips();
+  view = { mode:'detail', id: nt.id };
+}
+
+// ---------- 事件委派 ----------
+$('#tripView').addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const act = el.dataset.act, i = +el.dataset.idx;
+  const d = view.draft;
+  switch (act) {
+    case 'new': startEdit(null); break;
+    case 'open': view = { mode:'detail', id: el.dataset.id }; break;
+    case 'back': view = { mode:'list' }; break;
+    case 'edit': { const t = trips.find(x => x.id === view.id); if (t) startEdit(t); break; }
+    case 'share': shareTrip(curTrip()); break;
+    case 'delete': deleteTrip(); break;
+    case 'importSave': importSave(); break;
+    case 'save': saveDraft(); break;
+    case 'cancel': cancelEdit(); break;
+    case 'addStop': addStop(); break;
+    case 'up': if (d && i > 0) [d.stops[i - 1], d.stops[i]] = [d.stops[i], d.stops[i - 1]]; break;
+    case 'down': if (d && i < d.stops.length - 1) [d.stops[i + 1], d.stops[i]] = [d.stops[i], d.stops[i + 1]]; break;
+    case 'sdel': if (d && confirm('刪除這個站點？')) d.stops.splice(i, 1); break;
+  }
+  renderTrip();
+});
+$('#tripView').addEventListener('input', e => {
+  if (view.mode === 'edit' && e.target.dataset.field === 'name') view.draft.name = e.target.value;
+});
+$('#tripView').addEventListener('change', e => {
+  if (view.mode !== 'edit') return;
+  const el = e.target, f = el.dataset.field;
+  if (f === 'name') { view.draft.name = el.value; return; }
+  if (el.dataset.idx === undefined) return;
+  const s = view.draft.stops[+el.dataset.idx]; if (!s) return;
+  if (f === 'country') { const first = CITIES.find(c => c.country === el.value); if (first) s.cityId = first.id; }
+  else if (f === 'cityId') s.cityId = el.value;
+  else if (f === 'arrive' || f === 'depart') { if (!el.value) return; s[f] = el.value; }
+  renderTrip();
+});
+
+// 分頁切換
+function activateTab(tab) {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x.dataset.tab === tab));
+  $('#tab-cities').classList.toggle('hidden', tab !== 'cities');
+  $('#tab-trip').classList.toggle('hidden', tab !== 'trip');
+  if (tab === 'trip') renderTrip();
+}
+document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
+
+// 狀態事件
+window.addEventListener('online', () => { render(); renderResults(); fetchAll(false); });
+window.addEventListener('offline', () => { render(); renderResults(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { render(); renderResults(); fetchAll(false); } });
+setInterval(() => { if (view.mode === 'detail') renderResults(); }, 30000);
+
+// ---------- 啟動 ----------
+setFromUtc(new Date());
+renderSelects(); render();
+const imported = importFromHash();
+activateTab(imported ? 'trip' : 'cities');
+if (!imported) renderTrip();
+fetchAll(false);
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
